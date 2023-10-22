@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu&display=swap");
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+body {
+  overflow: hidden;
+  font-family: "Ubuntu", sans-serif;
+  background: #1c1c1c;
+}
+
+label {
+  color: #fff;
+}
+
+.form-el {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: 5px;
+}
+
+.form-button {
+  width: 100%;
+}
+
+input {
+  padding: 10px 20px;
+  outline: none;
+}
+

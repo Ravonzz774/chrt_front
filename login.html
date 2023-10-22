@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+
+    <link rel="stylesheet" href="/css/login.css" />
+  </head>
+  <body>
+    <div class="container">
+      <form id="myForm" class="form">
+        <div class="form-el">
+          <label for="username">Имя пользователя:</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+
+        <div class="form-el">
+          <label for="password">Пароль:</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+
+        <input
+          type="submit"
+          value="Зарегестрироватся"
+          class="form-button"
+          id="reg-button"
+        />
+        <input
+          type="submit"
+          value="Войти"
+          class="form-button"
+          id="login-button"
+        />
+      </form>
+    </div>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script type="module" src="/scripts/login.js"></script>
+  </body>
+</html>
