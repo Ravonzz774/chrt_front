@@ -47,8 +47,77 @@ function addObjectToArray(arr, obj) {
   }
 }
 
-getProfileData("http://localhost:5000/api/profile");
 
+function getTeacherScheduleById(schedule, teacherId) {
+  const teacherSchedule = [];
+
+  schedule.forEach(course => {
+    course.groups.forEach(group => {
+      group.days.forEach(day => {
+        day.lessons.forEach(lesson => {
+          const teacherLesson = lesson.find(l => l.teacherId === teacherId);
+          if (teacherLesson) {
+            teacherSchedule.push({ lesson: teacherLesson, day: day.day });
+          }
+        });
+      });
+    });
+  });
+
+  return teacherSchedule;
+}
+
+
+function getScheduleByClassroom(schedule, classroom) {
+  const classroomSchedule = [];
+
+  schedule.forEach(course => {
+    course.groups.forEach(group => {
+      group.days.forEach(day => {
+        day.lessons.forEach(lesson => {
+          const classroomLesson = lesson.find(l => l.cabinet === classroom);
+
+          if (classroomLesson) {
+            classroomSchedule.push({ lesson: classroomLesson, day: day.day });
+          }
+        });
+      });
+    });
+  });
+
+  return classroomSchedule;
+}
+
+
+function convertCabDataToSchedule(data) {
+  const schedule = {};
+
+  data.forEach(item => {
+    const { lesson, day } = item;
+    const lessonNumber = lesson.number;
+
+    if (!schedule[day]) {
+      schedule[day] = [];
+    }
+
+    // Проверяем, занят ли кабинет в указанное время
+    const conflictingLesson = schedule[day].find(existingLesson => {
+      return (
+        existingLesson.lesson.number === lessonNumber &&
+        existingLesson.lesson.cabinet === lesson.cabinet
+      );
+    });
+
+    if (conflictingLesson) {
+      // Если кабинет занят, добавляем урок в массив уроков этого кабинета
+      conflictingLesson.lesson.name += ` / ${lesson.name}`;
+    } else {
+      // Если кабинет свободен, добавляем новую запись в массив расписания для указанной даты
+      schedule[day].push(item);
+    }
+  });
+  return schedule
+};
 
 
 const postData = async (url = "", data = {}) => {
@@ -150,10 +219,12 @@ document
       }
     }
 
-    for (let teacher of teachers) {
-      console.log(teacher)
-    }
+    console.log(teachers)
+    // console.log(convertDataToSchedule(getTeacherScheduleById(result, "76")))
+    console.log(convertCabDataToSchedule(getScheduleByClassroom(result, "412")))
+
 
   });
 
 
+getProfileData("http://localhost:5000/api/profile");
