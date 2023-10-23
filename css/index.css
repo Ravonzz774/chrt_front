@@ -1,0 +1,14 @@
+body {
+    overflow: hidden;
+    font-family: "Ubuntu", sans-serif;
+    background: #1c1c1c;
+    color: #fff;
+
+}
+
+.container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+}

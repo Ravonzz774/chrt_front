@@ -1,27 +1,3 @@
-// document.getElementById("myForm").addEventListener("submit", function (event) {
-//   event.preventDefault(); // Предотвращаем отправку формы
-
-//   // Получаем значения полей формы
-
-//   var name = document.getElementById("username").value;
-//   var password = document.getElementById("password").value;
-
-//   let user = {
-//     username : name,
-//     password : password,
-//   }
-
-//   // Делаем что-то с полученными данными
-//   console.log("Имя: " + name);
-//   console.log("Password: " + password);
-
-//   console.log(postData('http://127.0.0.1:5000/api/register',user))
-
-//   // Очищаем поля формы
-//   document.getElementById("username").value = "";
-//   document.getElementById("password").value = "";
-// });
-
 const postData = async (url = "", data = {}) => {
   // Формируем запрос
   const response = await fetch(url, {
