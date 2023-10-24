@@ -41,85 +41,6 @@ const Get_Teachers_Data = async (url = "") => {
 };
 
 
-function addObjectToArray(arr, obj) {
-  if (!arr.some(item => JSON.stringify(item) === JSON.stringify(obj))) {
-    arr.push(obj);
-  }
-}
-
-
-function getTeacherScheduleById(schedule, teacherId) {
-  const teacherSchedule = [];
-
-  schedule.forEach(course => {
-    course.groups.forEach(group => {
-      group.days.forEach(day => {
-        day.lessons.forEach(lesson => {
-          const teacherLesson = lesson.find(l => l.teacherId === teacherId);
-          if (teacherLesson) {
-            teacherSchedule.push({ lesson: teacherLesson, day: day.day });
-          }
-        });
-      });
-    });
-  });
-
-  return teacherSchedule;
-}
-
-
-function getScheduleByClassroom(schedule, classroom) {
-  const classroomSchedule = [];
-
-  schedule.forEach(course => {
-    course.groups.forEach(group => {
-      group.days.forEach(day => {
-        day.lessons.forEach(lesson => {
-          const classroomLesson = lesson.find(l => l.cabinet === classroom);
-
-          if (classroomLesson) {
-            classroomSchedule.push({ lesson: classroomLesson, day: day.day });
-          }
-        });
-      });
-    });
-  });
-
-  return classroomSchedule;
-}
-
-
-function convertCabDataToSchedule(data) {
-  const schedule = {};
-
-  data.forEach(item => {
-    const { lesson, day } = item;
-    const lessonNumber = lesson.number;
-
-    if (!schedule[day]) {
-      schedule[day] = [];
-    }
-
-    // Проверяем, занят ли кабинет в указанное время
-    const conflictingLesson = schedule[day].find(existingLesson => {
-      return (
-        existingLesson.lesson.number === lessonNumber &&
-        existingLesson.lesson.cabinet === lesson.cabinet
-      );
-    });
-
-    if (conflictingLesson) {
-      // Если кабинет занят, добавляем урок в массив уроков этого кабинета
-      conflictingLesson.lesson.name += ` / ${lesson.name}`;
-    } else {
-      // Если кабинет свободен, добавляем новую запись в массив расписания для указанной даты
-      schedule[day].push(item);
-    }
-  });
-  return schedule
-};
-
-
 const postData = async (url = "", data = {}) => {
   // Формируем запрос
   const response = await fetch(url, {
@@ -137,6 +58,174 @@ const postData = async (url = "", data = {}) => {
   return response.json();
 };
 
+
+function addObjectToArray(arr, obj) {
+  if (!arr.some(item => JSON.stringify(item) === JSON.stringify(obj))) {
+    arr.push(obj);
+  }
+}
+
+
+function getScheduleByTeacherId(schedule, teacherId) {
+  const teacherSchedule = [];
+
+  schedule.forEach(course => {
+    course.groups.forEach(group => {
+      group.days.forEach(day => {
+        day.lessons.forEach(lesson => {
+          const teacherLesson = lesson.find(l => l.teacherId === teacherId);
+          if (teacherLesson) {
+            lesson[0].group = group.name
+            teacherSchedule.push({ lesson: lesson, day: day.day, });
+          }
+        });
+      });
+    });
+  });
+
+  return processSchedule(teacherSchedule);
+}
+
+
+function getScheduleByClassroom(schedule, classroom) {
+  const classroomSchedule = [];
+
+  schedule.forEach(course => {
+    course.groups.forEach(group => {
+      group.days.forEach(day => {
+        day.lessons.forEach(lesson => {
+          const classroomLesson = lesson.find(l => l.cabinet === classroom);
+
+          if (classroomLesson) {
+            lesson[0].group = group.name
+            classroomSchedule.push({ lesson: lesson, day: day.day, });
+          }
+        });
+      });
+    });
+  });
+
+  return processSchedule(classroomSchedule);
+}
+
+function getScheduleByGroupId(schedule, groupId) {
+  const classroomSchedule = [];
+
+  schedule.forEach(course => {
+    course.groups.forEach(group => {
+      group.days.forEach(day => {
+        day.lessons.forEach(lesson => {
+
+          if (group.id === groupId) {
+            lesson[0].group = group.name
+            classroomSchedule.push({ lesson: lesson, day: day.day });
+          }
+        });
+      });
+    });
+  });
+
+  return processSchedule(classroomSchedule);
+}
+
+
+function processSchedule(schedule) {
+  const obj = {};
+
+  for (const item of schedule) {
+    const day = item.day;
+    const lesson = item.lesson[0];
+    const number = lesson.number;
+
+    if (!obj[day]) {
+      obj[day] = {
+        number: [],
+        pairs: []
+      };
+    }
+
+    if (!obj[day].number.includes(number)) {
+      obj[day].number.push(number);
+    }
+
+    const pair = obj[day].pairs.find(pair => pair.number === number);
+
+    if (pair) {
+      pair.lessons.push(lesson);
+    } else {
+      obj[day].pairs.push({
+        number: number,
+        lessons: [lesson]
+      });
+    }
+  }
+
+  return obj;
+}
+
+function getTeachersList(data) {
+  let teachers = []
+  for (let course of data) {
+    for (let group of course.groups) {
+      for (let day of group.days) {
+        for (let lesson of day.lessons) {
+          addObjectToArray(teachers,
+            {
+              name: lesson[0].teacher,
+              id: lesson[0].teacherId
+            }
+          )
+        }
+      }
+    }
+  }
+
+  return teachers
+}
+
+function sortByLastName(array) {
+  return array.sort((a, b) => {
+    const lastNameA = a.name.split(' ')[0];
+    const lastNameB = b.name.split(' ')[0];
+    return lastNameA.localeCompare(lastNameB);
+  });
+}
+
+function getFirstLettersAndIndexes(array) {
+  const result = [];
+  let prevLetter = '';
+  array.forEach((item, index) => {
+      const lastName = item.name.split(' ')[0];
+      const firstLetter = lastName.charAt(0);
+      if (firstLetter !== prevLetter) {
+          result.push({
+              letter: firstLetter,
+              index: index
+          });
+          prevLetter = firstLetter;
+      }
+  });
+  return result;
+}
+
+
+function getGroupIdsAndNames(data) {
+  let courses = []
+  let i = 0;
+  for (let course of data) {
+    courses.push({
+      course: course,
+      groups: []
+    })
+    for (let group of course.groups) {
+      courses[i].groups.push({
+        id: group.id,
+        name: group.name
+      })
+    }
+    i += 1;
+  }
+}
 
 document
   .getElementById("add-button")
@@ -195,7 +284,7 @@ document
 
 
 document
-  .getElementById("get_teachers-button")
+  .getElementById("test-button")
   .addEventListener("click", async function (event) {
     event.preventDefault(); // Предотвращаем отправку формы
 
@@ -203,25 +292,17 @@ document
 
     // Делаем что-то с полученными данными
 
-    let teachers = []
-    for (let course of result) {
-      for (let group of course.groups) {
-        for (let day of group.days) {
-          for (let lesson of day.lessons) {
-            addObjectToArray(teachers,
-              {
-                name: lesson[0].teacher,
-                id: lesson[0].teacherId
-              }
-            )
-          }
-        }
-      }
-    }
 
-    console.log(teachers)
-    // console.log(convertDataToSchedule(getTeacherScheduleById(result, "76")))
-    console.log(convertCabDataToSchedule(getScheduleByClassroom(result, "412")))
+
+    console.log(result)
+    console.log(sortByLastName(getTeachersList(result)))
+    console.log(getFirstLettersAndIndexes(sortByLastName(getTeachersList(result))))
+
+    console.log(getGroupIdsAndNames(result))
+    console.log(getScheduleByGroupId(result, "1263"))
+    console.log(getScheduleByClassroom(result, "Дистант"))
+    console.log(getScheduleByTeacherId(result, "76"))
+
 
 
   });
