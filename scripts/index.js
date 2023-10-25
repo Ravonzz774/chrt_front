@@ -28,8 +28,20 @@ const getProfileData = async (url = "") => {
     });
 };
 
+const getNewsData = async (url = "") => {
+  // Формируем запрос
+  const response = await fetch(url, {
+    // Метод, если не указывать, будет использоваться GET
+    method: "GET",
+    credentials: "include",
+  });
 
-const Get_Teachers_Data = async (url = "") => {
+  return response.json()
+
+};
+
+
+const Get_Timetable_Data = async (url = "") => {
   // Формируем запрос
   const response = await fetch(url, {
     // Метод, если не указывать, будет использоваться GET
@@ -195,15 +207,15 @@ function getFirstLettersAndIndexes(array) {
   const result = [];
   let prevLetter = '';
   array.forEach((item, index) => {
-      const lastName = item.name.split(' ')[0];
-      const firstLetter = lastName.charAt(0);
-      if (firstLetter !== prevLetter) {
-          result.push({
-              letter: firstLetter,
-              index: index
-          });
-          prevLetter = firstLetter;
-      }
+    const lastName = item.name.split(' ')[0];
+    const firstLetter = lastName.charAt(0);
+    if (firstLetter !== prevLetter) {
+      result.push({
+        letter: firstLetter,
+        index: index
+      });
+      prevLetter = firstLetter;
+    }
   });
   return result;
 }
@@ -288,21 +300,35 @@ document
   .addEventListener("click", async function (event) {
     event.preventDefault(); // Предотвращаем отправку формы
 
-    let result = await Get_Teachers_Data("http://localhost:5000/api/timetable"); // Добавляем ключевое слово "await" и сохраняем результат вызова функции postData в переменную "result"
+    let result = await Get_Timetable_Data("http://localhost:5000/api/timetable"); // Добавляем ключевое слово "await" и сохраняем результат вызова функции postData в переменную "result"
+
 
     // Делаем что-то с полученными данными
-
 
 
     console.log(result)
     console.log(sortByLastName(getTeachersList(result)))
     console.log(getFirstLettersAndIndexes(sortByLastName(getTeachersList(result))))
 
+    // console.log(news)
+
+
     console.log(getGroupIdsAndNames(result))
     console.log(getScheduleByGroupId(result, "1263"))
     console.log(getScheduleByClassroom(result, "Дистант"))
     console.log(getScheduleByTeacherId(result, "76"))
 
+    let news = await getNewsData("http://localhost:5000/api/news")
+
+    console.log(news)
+
+    for (let i of news) {
+      let news_block = document.createElement('div');
+      news_block.innerHTML(`
+      
+      
+      `)
+    }
 
 
   });
